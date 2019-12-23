@@ -1,20 +1,41 @@
 package com.aca;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * @Author Hu mingzhi
  * Created by ThinKPad on 2019/12/19.
  */
-public class ACA {
+public class ACASec {
 
-    static int ant_num = 50;/*蚂蚁数量*/
-    int alpha = 1;//α因子
-    int beta = 10;//β因子
-    static double rho = 0.5;//信息素挥发因子
-    int Q = 1;//常数
-    static int citynum = 31;
+    int ant_num = 50;/*蚂蚁数量*/
+    double alpha = 1;//α因子
+    double beta = 10;//β因子
+    double rho = 0.5;//信息素挥发因子
+    int Q = 1;
+    int citynum = 31;
+    int generation = 100;
+    int deltaType; // 信息素更新方式模型，0: Ant-quantity; 1: Ant-density; 2: Ant-cycle
+    double minDist = 0;
+    int[] BestPath;
+    private int[] bestTour;
+    private int bestLength;
+
+
+    public ACASec(int cityNum, int antNum, int generation, double alpha, double beta, double rho, int q, int deltaType) {
+        this.ant_num = antNum;
+        this.alpha = alpha;//α因子
+        this.beta = beta;//β因子
+        this.rho = rho;//信息素挥发因子
+        this.citynum = cityNum;
+        this.Q = q;
+        this.deltaType = deltaType;
+        this.generation = generation;
+    }
+
+
+    public ACASec() {
+    }
 
     public double[][] init_p(int[][] distance) {
         //对信息素概率的初始量进行更新，初始概率为每个点到其余点的路径和分之路径
@@ -163,16 +184,16 @@ public class ACA {
         return dist;
     }
 
-    public static void main(String[] args) throws IOException {
+    public void ACA(int cityNum, int antNum, int generation, double alpha, double beta, double rho, int q, int deltaType) throws IOException {
         FileLoader fL = new FileLoader();
-        int[][] distance = fL.loadNodeInfoACA("Node_info.txt", 31);
-        ACA b = new ACA();
+        int[][] distance = fL.loadNodeInfoACA("node_chn.txt", citynum);
+        ACASec b = new ACASec(cityNum, antNum, generation, alpha, beta, rho, q, deltaType);
         double p[][] = b.init_p2(distance);//产生概率
         int iter = 200;
         int i = 1;
         int[][] path = new int[ant_num][citynum];
         double min = Integer.MAX_VALUE;//保存最佳路径
-        int best_path[] = new int[citynum];//保存最佳路径
+        BestPath = new int[citynum];//保存最佳路径
         while (i < 100) {
             for (int j = 0; j < ant_num; j++)//令每个蚂蚁去寻找路径
             {
@@ -189,7 +210,7 @@ public class ACA {
                     min = L;//更新最优解
                     for (int k = 0; k < citynum; k++)//保存最短路径
                     {
-                        best_path[k] = path[current][k];
+                        BestPath[k] = path[current][k];
                     }
                 }
                 for (int k = 0; k < citynum - 1; k++) {
@@ -201,7 +222,7 @@ public class ACA {
             //挥发信息素
             for (int j = 0; j < citynum; j++) {
                 for (int k = 0; k < citynum; k++) {
-                    p[j][k] = rho * p[j][k];
+                    p[j][k] = this.rho * p[j][k];
                 }
             }
             i++;
@@ -209,16 +230,26 @@ public class ACA {
         }
         System.out.println("最终路径：");
         for (int k = 0; k < citynum; k++) {
-            System.out.print(best_path[k] + 1 + " ");
+            System.out.print(BestPath[k] + 1 + " ");
         }
         System.out.print("最小距离：");
         System.out.println(min);
+        minDist = min;
     }
 
-    public static void main2(String[] args) throws IOException {
+    public int[] getBestTour() {
+        return BestPath;
+    }
+
+    public double getBestLength() {
+        return minDist;
+    }
+
+/*
+    public void main2() throws IOException {
         Bbtsp a = new Bbtsp();
         int[][] distance = a.init("C:\\Users\\ThinKPad\\Desktop\\GA\\att48.txt");
-        ACA b = new ACA();
+        ACASec b = new ACASec();
         double p[][] = b.init_p(distance);//产生概率
         int iter = 200;
         int i = 1;
@@ -267,4 +298,5 @@ public class ACA {
         System.out.println(min);
 
     }
+*/
 }
